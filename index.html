@@ -3,589 +3,1162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roast & Tech — Анализ системы скидок и ценообразования</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>Беспроводная зарядка: Электромагнитная индукция</title>
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: {
-              dark: '#0b0907',
-              card: '#16120e',
-              cardBorder: '#2a2219',
-              gold: '#e5a93c',
-              goldHover: '#f5b94c',
-              goldMuted: '#a37928',
-              goldLight: 'rgba(229, 169, 60, 0.12)',
-              subtext: '#9a8f82'
-            }
+            deepEmerald: '#030c08',
+            darkForest: '#06170e',
+            emeraldNavy: '#0c2417',
+            cardGreen: '#102e1f',
+            neonGreen: '#34d399',
+            emeraldGlow: '#10b981',
+            darkEmerald: '#059669',
+            mintBright: '#6ee7b7',
+            accentLime: '#a3e635'
           },
           fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Montserrat', 'sans-serif'],
           }
         }
       }
     }
   </script>
+
   <style>
-    body {
-      background-color: #0b0907;
-      color: #e2d9cd;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      user-select: none;
-      overflow: hidden;
-    }
-
-    /* Glow & Card Styling matching website screenshot */
-    .gold-glow {
-      box-shadow: 0 0 25px rgba(229, 169, 60, 0.15);
-    }
-    .gold-glow-sm {
-      box-shadow: 0 0 15px rgba(229, 169, 60, 0.1);
-    }
-    .gold-border-glow {
-      border: 1px solid rgba(229, 169, 60, 0.4);
-      box-shadow: inset 0 0 12px rgba(229, 169, 60, 0.08), 0 0 15px rgba(229, 169, 60, 0.1);
-    }
-
-    .slide {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.35s ease-in-out, transform 0.35s ease-in-out;
-      transform: translateY(8px);
-    }
-    .slide.active {
-      display: flex;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Scrollbar customization */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #16120e;
+      background: #030c08;
     }
     ::-webkit-scrollbar-thumb {
-      background: #a37928;
+      background: #102e1f;
       border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #34d399;
+    }
+
+    /* Ambient Glowing Orbs */
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: 0.35;
+      pointer-events: none;
+      animation: floatGlow 14s ease-in-out infinite alternate;
+    }
+    .glow-orb-1 {
+      top: 5%;
+      left: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #10b981 0%, #059669 100%);
+    }
+    .glow-orb-2 {
+      bottom: 5%;
+      right: 10%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, #34d399 0%, #047857 100%);
+      animation-delay: -7s;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(45px, -35px) scale(1.1); }
+      100% { transform: translate(-35px, 45px) scale(0.92); }
+    }
+
+    /* Background Canvas Particles */
+    #particleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Glassmorphism Styles */
+    .glass-panel {
+      background: rgba(12, 36, 23, 0.65);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(52, 211, 153, 0.18);
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    .glass-card {
+      background: rgba(16, 185, 129, 0.05);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(52, 211, 153, 0.14);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      background: rgba(16, 185, 129, 0.11);
+      border-color: rgba(52, 211, 153, 0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 35px -10px rgba(16, 185, 129, 0.35);
+    }
+
+    .glass-pill {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #34d399;
+    }
+
+    /* 3D Tilt Wrapper */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* Slide Transition System */
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.96) translateY(14px);
+      transition: opacity 0.55s ease, transform 0.55s ease, visibility 0.55s;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5.5rem 1.5rem 5.5rem 1.5rem;
+      z-index: 5;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Staggered Cascade Entrance Animations */
+    .slide.active .anim-1 { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
+    .slide.active .anim-2 { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
+    .slide.active .anim-3 { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
+    .slide.active .anim-4 { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both; }
+    .slide.active .anim-5 { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both; }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .text-glow {
+      text-shadow: 0 0 24px rgba(52, 211, 153, 0.6);
+    }
+    .text-glow-emerald {
+      text-shadow: 0 0 24px rgba(16, 185, 129, 0.7);
+    }
+
+    /* Induction Field & Pulse Wave Animations */
+    @keyframes pulseWave {
+      0% { stroke-dashoffset: 80; opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0.2; }
+    }
+
+    @keyframes floatPad {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes particleFlow {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .magnetic-field-line {
+      stroke-dasharray: 8, 8;
+      animation: pulseWave 2s linear infinite;
+    }
+
+    .flowing-particles {
+      stroke-dasharray: 6, 12;
+      animation: particleFlow 1.5s linear infinite;
+    }
+
+    .glow-coil-tx {
+      filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.95));
+    }
+    .glow-coil-rx {
+      filter: drop-shadow(0 0 12px rgba(163, 230, 53, 0.95));
+    }
+    .floating-graphic {
+      animation: floatPad 4s ease-in-out infinite;
+    }
+
+    /* FOD Scanner Beam Animation */
+    @keyframes scanBeam {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .fod-scanner-line {
+      animation: scanBeam 2.5s ease-in-out infinite;
+    }
+
+    /* EV Highway Motion Animation */
+    @keyframes driveRoad {
+      0% { background-position-x: 0px; }
+      100% { background-position-x: 100px; }
+    }
+    .road-animated {
+      background-image: repeating-linear-gradient(90deg, #34d399 0, #34d399 20px, transparent 20px, transparent 40px);
+      animation: driveRoad 1.2s linear infinite;
     }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between p-4 md:p-6 bg-[#0b0907]">
+<body class="bg-deepEmerald text-slate-100 font-sans h-screen w-screen overflow-hidden select-none relative">
 
-  <!-- Top App Navigation / Header Bar -->
-  <header class="w-full max-w-7xl mx-auto flex items-center justify-between pb-3 border-b border-[#2a2219]">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e5a93c] to-[#a37928] flex items-center justify-center text-[#0b0907] font-bold shadow-lg shadow-[#e5a93c]/20">
-        <i class="fa-solid fa-mug-hot text-lg"></i>
+  <!-- Interactive Particle Background Canvas -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Ambient Glowing Orbs -->
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
+  <!-- Top Progress Bar -->
+  <div class="fixed top-0 left-0 w-full z-50 h-1.5 bg-darkForest/80 backdrop-blur-md">
+    <div id="progressBar" class="h-full bg-gradient-to-r from-emeraldGlow via-neonGreen to-accentLime transition-all duration-500 ease-out w-1/6"></div>
+  </div>
+
+  <!-- Header Nav Bar -->
+  <header class="fixed top-0 left-0 right-0 z-40 px-6 py-4 flex items-center justify-between pointer-events-none bg-gradient-to-b from-deepEmerald/90 to-transparent">
+    <div class="flex items-center space-x-3 pointer-events-auto">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emeraldGlow via-neonGreen to-accentLime flex items-center justify-center text-deepEmerald font-black shadow-lg shadow-neonGreen/20">
+        <i class="fa-solid fa-bolt text-lg animate-pulse"></i>
       </div>
       <div>
-        <div class="font-mono text-base font-extrabold tracking-wider text-white flex items-center gap-2">
-          ROAST & TECH <span class="text-xs px-2 py-0.5 rounded bg-[#e5a93c]/15 text-[#e5a93c] font-sans font-semibold">SMART HAUBS</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Физика & Электроника</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emeraldGlow/20 text-neonGreen border border-emeraldGlow/30 font-mono">ПО-243</span>
         </div>
-        <p class="text-xs text-[#9a8f82]">Маркетинговый анализ & Система скидок 2026</p>
+        <h1 class="text-xs font-medium text-slate-300">Беспроводная передача энергии</h1>
       </div>
     </div>
 
-    <!-- Active Speaker Badge -->
-    <div id="speaker-badge" class="hidden">
-      <span id="speaker-name"></span>
-    </div>
+    <!-- Header Authors & Controls -->
+    <div class="flex items-center space-x-3 pointer-events-auto">
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl glass-panel text-xs text-slate-300">
+        <i class="fa-solid fa-user-graduate text-neonGreen"></i>
+        <span>Авторы: <strong class="text-white">Хазиев Ильхам и Мацаев Юсуф</strong> (<span class="text-neonGreen font-mono">ПО-243</span>)</span>
+      </div>
 
-    <button onclick="toggleFullScreen()" class="px-3 py-1.5 rounded-lg bg-[#16120e] border border-[#2a2219] text-xs text-[#9a8f82] hover:text-[#e5a93c] hover:border-[#e5a93c]/50 transition flex items-center gap-1.5">
-      <i class="fa-solid fa-expand"></i>
-      <span class="hidden md:inline">На весь экран</span>
-    </button>
+      <!-- Autoplay Button with Circular Timer -->
+      <button id="btnAutoPlay" onclick="toggleAutoplay()" title="Автозапуск слайдов" class="px-3 py-1.5 rounded-xl text-xs font-medium glass-panel hover:bg-white/10 text-slate-300 hover:text-neonGreen transition flex items-center gap-2">
+        <div class="relative w-4 h-4 flex items-center justify-center">
+          <svg class="w-4 h-4 transform -rotate-90" viewBox="0 0 36 36">
+            <path class="text-slate-600" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path id="autoplayTimerCircle" class="text-neonGreen stroke-current transition-all duration-100" stroke-width="4" stroke-dasharray="0, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          </svg>
+          <i class="fa-solid fa-play text-[10px] text-neonGreen absolute" id="autoplayIcon"></i>
+        </div>
+        <span id="autoplayText" class="hidden sm:inline">Авто</span>
+      </button>
+
+      <button onclick="toggleGridModal()" title="Все слайды (M)" class="px-3 py-1.5 rounded-xl text-xs font-medium glass-panel hover:bg-white/10 text-slate-300 hover:text-neonGreen transition flex items-center gap-2">
+        <i class="fa-solid fa-grip-vertical"></i>
+        <span class="hidden sm:inline">Обзор</span>
+      </button>
+
+      <button onclick="toggleShortcutsModal()" title="Подсказки (?)" class="px-3 py-1.5 rounded-xl text-xs font-medium glass-panel hover:bg-white/10 text-slate-300 hover:text-neonGreen transition">
+        <i class="fa-solid fa-keyboard"></i>
+      </button>
+    </div>
   </header>
 
-  <!-- MAIN SLIDE CONTAINER -->
-  <main class="w-full max-w-7xl mx-auto flex-1 my-3 flex items-center justify-center relative overflow-hidden">
+  <!-- ==================== MAIN DECK CONTAINER ==================== -->
+  <main id="deckContainer" class="relative w-full h-full max-w-6xl mx-auto">
 
-    <!-- SLIDE 1: TITULAR (HERO) -->
-    <div class="slide active w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow relative">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center gap-2 font-mono text-xs text-[#e5a93c] tracking-widest uppercase">
-          <span class="w-2 h-2 rounded-full bg-[#e5a93c] animate-pulse"></span> ПРЕЗЕНТАЦИЯ БИЗНЕС-ИДЕИ
+    <!-- SLIDE 1: TITLE SLIDE (3D TILT CARD + AURA) -->
+    <section class="slide active" id="slide-1">
+      <div class="max-w-3xl mx-auto text-center space-y-3 pt-2">
+        
+        <div class="anim-1 inline-flex items-center space-x-2 px-3.5 py-1 rounded-full glass-pill text-[11px] font-bold uppercase tracking-widest">
+          <i class="fa-solid fa-atom text-neonGreen animate-spin" style="animation-duration: 8s;"></i>
+          <span>Презентация по физике • Электромагнетизм</span>
         </div>
-        <div class="text-xs text-[#9a8f82] font-mono">СЛАЙД 1 / 8</div>
-      </div>
 
-      <div class="text-center my-auto max-w-3xl mx-auto">
-        <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-[#e5a93c]/10 border border-[#e5a93c]/40 flex items-center justify-center text-[#e5a93c] text-3xl gold-glow-sm">
-          <i class="fa-solid fa-mug-hot"></i>
-        </div>
-        <p class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-2">— АНАЛИЗ СИСТЕМЫ СКИДОК & ЦЕНООБРАЗОВАНИЯ —</p>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
-          Roast & Tech
+        <h1 class="anim-2 text-2xl sm:text-4xl lg:text-4xl font-extrabold font-heading text-white leading-tight text-glow">
+          Беспроводная Зарядка: <br>
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-neonGreen via-emeraldGlow to-accentLime">
+            Как энергия передаётся без проводов?
+          </span>
         </h1>
-        <p class="text-sm md:text-base text-[#9a8f82] leading-relaxed max-w-2xl mx-auto">
-          Стратегия применения скидочных механик для умных кофейных хабов самообслуживания & Мобильной подписочной экосистемы.
+
+        <!-- 3D Tilt Card Container -->
+        <div class="anim-3 py-1 flex justify-center">
+          <div id="tiltCard" class="tilt-card glass-card p-4 rounded-2xl max-w-sm w-full border border-neonGreen/40 relative shadow-xl overflow-hidden cursor-pointer">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-neonGreen/20 rounded-full blur-2xl"></div>
+            
+            <!-- Animated Interactive Vector Graphic -->
+            <div class="relative w-full h-28 flex items-center justify-center">
+              <svg viewBox="0 0 240 110" class="w-full h-full">
+                <!-- Wireless Charging Pad -->
+                <ellipse cx="120" cy="85" rx="85" ry="20" fill="#0c2417" stroke="#34d399" stroke-width="2.5" />
+                <ellipse cx="120" cy="85" rx="65" ry="15" fill="#102e1f" stroke="#10b981" stroke-width="1.5" />
+                <circle cx="120" cy="85" r="5" fill="#34d399" class="animate-ping" />
+
+                <!-- Pulsating Magnetic Field Waves -->
+                <ellipse cx="120" cy="62" rx="52" ry="12" fill="none" stroke="#34d399" stroke-width="2" stroke-dasharray="6,4" class="magnetic-field-line" />
+                <ellipse cx="120" cy="44" rx="36" ry="9" fill="none" stroke="#a3e635" stroke-width="2" stroke-dasharray="6,4" class="magnetic-field-line" style="animation-duration:1.3s;" />
+
+                <!-- Floating Phone with Active Charging Aura -->
+                <g class="floating-graphic">
+                  <rect x="80" y="10" width="80" height="36" rx="7" fill="#06170e" stroke="#34d399" stroke-width="2" />
+                  <rect x="84" y="13" width="72" height="30" rx="4" fill="#0c2417" />
+                  <text x="120" y="32" fill="#34d399" font-size="12" font-family="FontAwesome" text-anchor="middle"> 85%</text>
+                </g>
+              </svg>
+            </div>
+            <p class="text-[10px] text-neonGreen font-mono uppercase tracking-wider text-center">
+              <i class="fa-solid fa-hand-pointer mr-1"></i> Пошевелите мышью для 3D наклона
+            </p>
+          </div>
+        </div>
+
+        <!-- Authors Badge Card -->
+        <div class="anim-4 glass-card p-3 rounded-xl max-w-sm mx-auto border-l-4 border-l-neonGreen flex items-center justify-between text-left">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-neonGreen/15 text-neonGreen flex items-center justify-center text-base font-bold">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Авторы работы</span>
+              <h4 class="text-xs font-bold text-white font-heading">Хазиев Ильхам и Мацаев Юсуф</h4>
+              <p class="text-[10px] text-neonGreen font-mono">Группа ПО-243</p>
+            </div>
+          </div>
+          <div class="text-right border-l border-slate-700/60 pl-2.5">
+            <span class="text-[9px] text-slate-400 block">Раздел</span>
+            <span class="text-[11px] font-semibold text-slate-200">Электроиндукция</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SLIDE 2: PROBLEM VS SOLUTION (INTERACTIVE TAB COMPARISON) -->
+    <section class="slide" id="slide-2">
+      <div class="space-y-4">
+        <div class="anim-1 flex items-center justify-between border-b border-slate-700/50 pb-2">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Слайд 02 • Сравнение технологий</span>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white">Зачем Нужна Беспроводная Зарядка?</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-mono">Слайд 02/06</span>
+        </div>
+
+        <!-- Interactive Mode Switcher Tabs -->
+        <div class="anim-2 flex justify-center gap-3">
+          <button id="btnTabWired" onclick="switchSlide2Tab('wired')" class="px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-rose-500/20 text-rose-400 border border-rose-500/40">
+            <i class="fa-solid fa-plug-circle-xmark"></i> 1. Проводной износ (Проблема)
+          </button>
+          <button id="btnTabWireless" onclick="switchSlide2Tab('wireless')" class="px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-darkForest text-slate-400 border border-slate-700">
+            <i class="fa-solid fa-wifi"></i> 2. Индукционное поле (Решение)
+          </button>
+        </div>
+
+        <!-- Tab 1: Wired Problems Panel -->
+        <div id="tabContentWired" class="anim-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-rose-500 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-heading font-bold text-white text-base">Механический Износ Разъёма</h3>
+              <span class="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30">Проблема 1</span>
+            </div>
+            <!-- Animated Cable Failure Counter -->
+            <div class="p-3 bg-darkForest rounded-xl border border-rose-500/30 text-center space-y-1">
+              <span class="text-2xl font-black font-mono text-rose-400" id="plugCounter">0</span>
+              <p class="text-[11px] text-slate-400">Циклов втыкания до расшатывания порта USB-C / Lightning</p>
+            </div>
+            <ul class="text-xs text-slate-300 space-y-1.5">
+              <li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-rose-400 mt-0.5"></i> Повреждение контактов внутри смартфона</li>
+              <li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-rose-400 mt-0.5"></i> Окисление от пыли и влаги</li>
+            </ul>
+          </div>
+
+          <!-- Cable Graphic -->
+          <div class="glass-card p-5 rounded-2xl border border-rose-500/20 flex flex-col justify-center items-center text-center space-y-3">
+            <svg viewBox="0 0 200 80" class="w-full h-20">
+              <path d="M 20 40 L 90 40 C 110 40 120 60 150 60 L 180 60" fill="none" stroke="#f43f5e" stroke-width="4" stroke-dasharray="5,5" />
+              <rect x="75" y="28" width="35" height="24" rx="4" fill="#0f261c" stroke="#f43f5e" stroke-width="2" />
+              <text x="92" y="44" fill="#f43f5e" font-size="12" font-family="FontAwesome" text-anchor="middle">⚡</text>
+            </svg>
+            <p class="text-xs text-slate-300">Кабель регулярно перетирается и ломается у основания штекера</p>
+          </div>
+        </div>
+
+        <!-- Tab 2: Wireless Solutions Panel (Hidden by default) -->
+        <div id="tabContentWireless" class="anim-3 hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-neonGreen space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-heading font-bold text-white text-base">Бесконтактный Перенос Энергии</h3>
+              <span class="text-[10px] font-mono text-neonGreen bg-neonGreen/10 px-2 py-0.5 rounded border border-neonGreen/30">Решение</span>
+            </div>
+            <div class="p-3 bg-darkForest rounded-xl border border-neonGreen/30 text-center space-y-1">
+              <span class="text-2xl font-black font-mono text-neonGreen">100% IP68</span>
+              <p class="text-[11px] text-slate-400">Защита от воды и грязи благодаря герметичному корпусу</p>
+            </div>
+            <ul class="text-xs text-slate-300 space-y-1.5">
+              <li class="flex items-start gap-2"><i class="fa-solid fa-check text-neonGreen mt-0.5"></i> Отсутствие механического трения разъемов</li>
+              <li class="flex items-start gap-2"><i class="fa-solid fa-check text-neonGreen mt-0.5"></i> Достаточно просто положить телефон на станцию</li>
+            </ul>
+          </div>
+
+          <!-- Wireless Graphic -->
+          <div class="glass-card p-5 rounded-2xl border border-neonGreen/30 flex flex-col justify-center items-center text-center space-y-3">
+            <svg viewBox="0 0 200 80" class="w-full h-20">
+              <ellipse cx="100" cy="55" rx="70" ry="16" fill="#0c2417" stroke="#34d399" stroke-width="2.5" />
+              <path d="M 50 35 Q 100 10 150 35" fill="none" stroke="#a3e635" stroke-width="2.5" class="magnetic-field-line" />
+              <text x="100" y="60" fill="#34d399" font-size="11" font-family="Montserrat" text-anchor="middle" font-weight="bold">Индукционное поле</text>
+            </svg>
+            <p class="text-xs text-slate-300">Передача через магнитные волны сквозь воздух и чехол</p>
+          </div>
+        </div>
+
+        <div class="anim-4 glass-panel p-3.5 rounded-xl flex items-center gap-3 border-l-4 border-l-accentLime">
+          <i class="fa-solid fa-lightbulb text-accentLime text-lg"></i>
+          <p class="text-xs text-slate-300">
+            <strong>Суть индукции:</strong> Электрический ток превращается в переменное магнитное поле в зарядке, а затем снова в ток внутри смартфона.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: FARADAY'S LAW & PULSE BEAM CHAIN -->
+    <section class="slide" id="slide-3">
+      <div class="space-y-4">
+        <div class="anim-1 flex items-center justify-between border-b border-slate-700/50 pb-2">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Слайд 03 • Физический Фундамент</span>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white">Закон Электромагнитной Индукции</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-mono">Слайд 03/06</span>
+        </div>
+
+        <p class="anim-2 text-slate-300 text-xs sm:text-sm">
+          В основе технологии лежит открытие Майкла Фарадея (1831 г.): <em>переменное магнитное поле наводит вихревое электрическое поле в замкнутом проводнике</em>.
         </p>
-      </div>
 
-      <!-- Team Members Row -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-[#2a2219]">
-        <div class="p-3 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[10px] font-mono font-bold text-[#e5a93c] uppercase">CEO / VISION</div>
-          <div class="text-xs font-bold text-white mt-0.5">Галушко Денис</div>
-          <div class="text-[11px] text-[#9a8f82]">Стратегия & Защита</div>
-        </div>
-        <div class="p-3 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[10px] font-mono font-bold text-[#e5a93c] uppercase">CTO / TECH</div>
-          <div class="text-xs font-bold text-white mt-0.5">Мацаев Юсуф</div>
-          <div class="text-[11px] text-[#9a8f82]">IT-платформа & Хаб</div>
-        </div>
-        <div class="p-3 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[10px] font-mono font-bold text-[#e5a93c] uppercase">CMO / MARKETING</div>
-          <div class="text-xs font-bold text-white mt-0.5">Барамышев Камиль</div>
-          <div class="text-[11px] text-[#9a8f82]">Продвижение & CAC</div>
-        </div>
-        <div class="p-3 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[10px] font-mono font-bold text-[#e5a93c] uppercase">CFO / FINANCE</div>
-          <div class="text-xs font-bold text-white mt-0.5">Хазиев Ильхам</div>
-          <div class="text-[11px] text-[#9a8f82]">Юнит-экономика & LTV</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 2: СТРАТЕГИЧЕСКИЙ ПОДТЕКСТ (SPEAKER 1) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— СТРАТЕГИЧЕСКИЙ КОНТЕКСТ</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Зачем Roast & Tech система скидок?</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219] hover:border-[#e5a93c]/50 transition">
-          <div class="w-10 h-10 rounded-lg bg-[#e5a93c]/10 flex items-center justify-center text-[#e5a93c] mb-3">
-            <i class="fa-solid fa-chart-line text-lg"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-1">Снижение CAC на 40%</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Скидка на 1-й заказ стимулирует первую установку мобильного приложения без дорогостоящей наружной рекламы.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#e5a93c]/40 gold-glow-sm">
-          <div class="w-10 h-10 rounded-lg bg-[#e5a93c]/10 flex items-center justify-center text-[#e5a93c] mb-3">
-            <i class="fa-solid fa-sync text-lg"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-1">Рост LTV и Retention</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Подписочные тарифы «Кофе-Pass» переводят импульсивные покупки в прогнозируемый ежемесячный доход.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219] hover:border-[#e5a93c]/50 transition">
-          <div class="w-10 h-10 rounded-lg bg-[#e5a93c]/10 flex items-center justify-center text-[#e5a93c] mb-3">
-            <i class="fa-solid fa-clock text-lg"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-1">Сглаживание провалов</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Динамические «Happy Hours» стимулируют дневные покупки (14:00–16:30), повышая утилизацию хаба.
-          </p>
-        </div>
-      </div>
-
-      <div class="p-4 rounded-xl bg-[#e5a93c]/10 border border-[#e5a93c]/30 flex items-center justify-between">
-        <span class="text-xs md:text-sm font-semibold text-white">Ключевое преимущество экономики:</span>
-        <span class="font-mono text-xs md:text-sm font-bold text-[#e5a93c]">Маржинальность бизнеса остаётся ~42%</span>
-      </div>
-    </div>
-
-    <!-- SLIDE 3: СКИДКА #1 — КОФЕ-PASS (SPEAKER 2) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div class="flex justify-between items-start">
-        <div>
-          <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— СКИДКА #1 (КЛЮЧЕВОЙ ДРАЙВЕР)</div>
-          <h2 class="text-2xl md:text-3xl font-extrabold text-white">Подписочные скидки «Кофе-Pass» (до 35%)</h2>
-        </div>
-        <span class="px-3 py-1 rounded-full bg-[#e5a93c]/20 text-[#e5a93c] font-mono text-xs font-bold border border-[#e5a93c]/40">B2C LTV ENGINE</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
-        <div class="space-y-3">
-          <div class="p-4 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-            <h4 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <i class="fa-solid fa-mobile-screen text-[#e5a93c]"></i> Механика подписки
-            </h4>
-            <p class="text-xs text-[#9a8f82]">
-              Клиент покупает месячный пакет на 10, 20 или 30 чашек в мобильном приложении. Стоимость одной чашки снижается на 20–35% от базовой розницы.
+        <!-- 3 Step Chain with Animated Pulse Beams -->
+        <div class="anim-3 grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+          
+          <div class="glass-card p-4 rounded-2xl space-y-2 border-t-4 border-t-emeraldGlow relative">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-emeraldGlow/20 text-neonGreen flex items-center justify-center font-bold font-mono text-xs">1</span>
+              <i class="fa-solid fa-wave-square text-neonGreen text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-white text-sm">1. Генерация Тока (Tx)</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Высокочастотный ток (110–205 кГц) подается на катушку передатчика, создавая быстро меняющееся поле.
             </p>
+            <div class="p-1.5 rounded bg-deepEmerald text-[11px] font-mono text-neonGreen text-center border border-neonGreen/20">
+              I (AC) ➔ B(t)
+            </div>
           </div>
-          <div class="p-4 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-            <h4 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <i class="fa-solid fa-microchip text-[#e5a93c]"></i> IT & Телеметрия
-            </h4>
-            <p class="text-xs text-[#9a8f82]">
-              Автоматическое списывание чашек через QR-код на хабе без кассира и наличных. Профиль зерна и рецепт подтягиваются из приложения.
+
+          <div class="glass-card p-4 rounded-2xl space-y-2 border-t-4 border-t-neonGreen relative">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-neonGreen/20 text-neonGreen flex items-center justify-center font-bold font-mono text-xs">2</span>
+              <i class="fa-solid fa-magnet text-neonGreen text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-white text-sm">2. Магнитный Поток</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Линии магнитного поля пронизывают витки катушки-приёмника внутри смартфона через зазор 5–8 мм.
             </p>
+            <div class="p-1.5 rounded bg-deepEmerald text-[11px] font-mono text-neonGreen text-center border border-neonGreen/20">
+              Ф = ∫ B · dS
+            </div>
           </div>
+
+          <div class="glass-card p-4 rounded-2xl space-y-2 border-t-4 border-t-accentLime relative">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-accentLime/20 text-accentLime flex items-center justify-center font-bold font-mono text-xs">3</span>
+              <i class="fa-solid fa-bolt-lightning text-accentLime text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-white text-sm">3. Наведение ЭДС (Rx)</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Изменение потока наводит ток в приемнике. Выпрямитель превращает его в постоянный ток (DC) для АКБ.
+            </p>
+            <div class="p-1.5 rounded bg-deepEmerald text-[11px] font-mono text-accentLime text-center border border-accentLime/20">
+              ЭДС = -dФ / dt
+            </div>
+          </div>
+
         </div>
 
-        <div class="flex flex-col justify-between p-5 rounded-xl bg-[#0b0907] border border-[#e5a93c]/40 gold-glow-sm">
+        <!-- Formula Highlight Banner with Interactive Tooltips -->
+        <div class="anim-4 glass-panel p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between border-l-4 border-l-neonGreen gap-3">
+          <div class="space-y-1 text-center sm:text-left">
+            <span class="text-[10px] uppercase tracking-wider font-mono text-neonGreen font-bold">Закон Фарадея-Ленца</span>
+            <p class="text-lg font-mono text-white font-extrabold text-glow-emerald">ЭДС = - N · (ΔФ / Δt)</p>
+          </div>
+          <div class="flex gap-2 text-[11px]">
+            <div class="px-2.5 py-1 rounded bg-darkForest border border-neonGreen/30 text-slate-200">
+              <strong class="text-neonGreen">N:</strong> Число витков
+            </div>
+            <div class="px-2.5 py-1 rounded bg-darkForest border border-neonGreen/30 text-slate-200">
+              <strong class="text-neonGreen">ΔФ:</strong> Изменение потока
+            </div>
+            <div class="px-2.5 py-1 rounded bg-darkForest border border-neonGreen/30 text-slate-200">
+              <strong class="text-neonGreen">Δt:</strong> Время
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: INTERACTIVE COIL DIAGRAM & CHARGING LAB -->
+    <section class="slide" id="slide-4">
+      <div class="space-y-3">
+        <div class="anim-1 flex items-center justify-between border-b border-slate-700/50 pb-2">
           <div>
-            <div class="text-xs font-mono text-[#e5a93c] font-bold uppercase mb-2">МОДЕЛИРОВАНИЕ ЭФФЕКТА</div>
-            <div class="space-y-2">
-              <div class="flex justify-between text-xs py-1.5 border-b border-[#2a2219]">
-                <span class="text-[#9a8f82]">Рост частоты визитов:</span>
-                <span class="font-mono font-bold text-white">3.8x в месяц</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Слайд 04 • Симуляционная Лаборатория</span>
+            <h2 class="text-xl sm:text-2xl font-bold font-heading text-white">Модель Индукции & Симулятор Зарядки</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-mono">Слайд 04/06</span>
+        </div>
+
+        <!-- Interactive Control Bar -->
+        <div class="anim-2 flex flex-wrap items-center justify-between gap-2 bg-darkForest/80 p-2.5 rounded-xl border border-neonGreen/30 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-white">Частота поля:</span>
+            <button id="btnFreq110" onclick="setCoilFrequency(110)" class="px-2.5 py-1 rounded bg-neonGreen text-deepEmerald font-mono font-bold">110 кГц</button>
+            <button id="btnFreq205" onclick="setCoilFrequency(205)" class="px-2.5 py-1 rounded bg-emeraldNavy text-slate-300 font-mono">205 кГц</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnToggleAlign" onclick="toggleCoilAlignment()" class="px-3 py-1 rounded bg-emeraldGlow/20 text-neonGreen border border-neonGreen/30 font-semibold">
+              <i class="fa-solid fa-arrows-to-dot mr-1"></i> Точное Совмещение
+            </button>
+            <button id="btnSimulateCharge" onclick="simulateBatteryCharge()" class="px-3 py-1 rounded bg-gradient-to-r from-neonGreen to-accentLime text-deepEmerald font-bold">
+              <i class="fa-solid fa-bolt mr-1"></i> Зарядить АКБ
+            </button>
+          </div>
+        </div>
+
+        <!-- Animated Coil Diagram SVG -->
+        <div class="anim-3 glass-card p-3 rounded-2xl border border-neonGreen/40 relative">
+          
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            
+            <!-- Transmitter Info -->
+            <div class="md:col-span-3 space-y-1.5 text-left">
+              <span class="text-[10px] font-mono font-bold text-neonGreen uppercase block">Катушка Передатчика (Tx)</span>
+              <h3 class="text-xs font-bold text-white font-heading">Зарядная Станция</h3>
+              <p class="text-[11px] text-slate-300">Подача переменного тока высокой частоты.</p>
+              <div class="p-1.5 bg-darkForest rounded text-[10px] font-mono text-neonGreen">Статус: Поле Активно</div>
+            </div>
+
+            <!-- SVG Diagram -->
+            <div class="md:col-span-6 flex flex-col items-center justify-center relative">
+              <svg id="svgCoilModel" viewBox="0 0 500 160" class="w-full h-auto max-h-[150px]">
+                <!-- Tx Coil (Left) -->
+                <g id="txCoilGroup" transform="translate(70, 80)">
+                  <ellipse cx="0" cy="0" rx="24" ry="52" fill="none" stroke="#10b981" stroke-width="6" class="glow-coil-tx" />
+                  <ellipse cx="-10" cy="0" rx="18" ry="42" fill="none" stroke="#34d399" stroke-width="3" />
+                  <rect x="-35" y="-55" width="10" height="110" rx="4" fill="#06170e" stroke="#34d399" stroke-width="1.5"/>
+                  <text x="0" y="70" fill="#34d399" font-size="10" font-family="Montserrat" text-anchor="middle" font-weight="bold">Tx (Станция)</text>
+                </g>
+
+                <!-- Dynamic Magnetic Field Lines -->
+                <g id="magneticWavesGroup">
+                  <path id="wave1" d="M 100 35 Q 250 10 400 35" fill="none" stroke="#34d399" stroke-width="2.5" class="magnetic-field-line" />
+                  <path id="wave2" d="M 100 125 Q 250 150 400 125" fill="none" stroke="#34d399" stroke-width="2.5" class="magnetic-field-line" />
+                  <path d="M 100 60 Q 250 40 400 60" fill="none" stroke="#a3e635" stroke-width="2" class="flowing-particles" />
+                  <path d="M 100 100 Q 250 120 400 100" fill="none" stroke="#a3e635" stroke-width="2" class="flowing-particles" />
+                </g>
+
+                <!-- Rx Coil (Right) -->
+                <g id="rxCoilGroup" transform="translate(430, 80)" class="transition-transform duration-500">
+                  <ellipse cx="0" cy="0" rx="24" ry="52" fill="none" stroke="#a3e635" stroke-width="6" class="glow-coil-rx" />
+                  <ellipse cx="10" cy="0" rx="18" ry="42" fill="none" stroke="#34d399" stroke-width="3" />
+                  <rect x="25" y="-55" width="10" height="110" rx="4" fill="#06170e" stroke="#a3e635" stroke-width="1.5"/>
+                  <text x="0" y="70" fill="#a3e635" font-size="10" font-family="Montserrat" text-anchor="middle" font-weight="bold">Rx (Смартфон)</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Receiver & Battery Status -->
+            <div class="md:col-span-3 space-y-1.5 text-left">
+              <span class="text-[10px] font-mono font-bold text-accentLime uppercase block">Приёмник (Rx) & Батарея</span>
+              <h3 class="text-xs font-bold text-white font-heading">Заряд Смартфона</h3>
+              <!-- Live Battery Fill Indicator -->
+              <div class="w-full bg-darkForest border border-slate-700 h-6 rounded-lg p-0.5 relative overflow-hidden flex items-center">
+                <div id="simBatteryBar" class="h-full bg-gradient-to-r from-emeraldGlow to-accentLime rounded transition-all duration-300 w-1/4"></div>
+                <span id="simBatteryPercent" class="absolute inset-0 flex items-center justify-center text-[10px] font-mono font-bold text-white">25%</span>
               </div>
-              <div class="flex justify-between text-xs py-1.5 border-b border-[#2a2219]">
-                <span class="text-[#9a8f82]">Удержание (Retention):</span>
-                <span class="font-mono font-bold text-[#e5a93c]">85% подписчиков</span>
-              </div>
-              <div class="flex justify-between text-xs py-1.5">
-                <span class="text-[#9a8f82]">Валовая маржа точки:</span>
-                <span class="font-mono font-bold text-white">60%+ сохранится</span>
-              </div>
+              <p class="text-[10px] text-slate-400">Нажмите «Зарядить АКБ» для проверки процесса.</p>
             </div>
+
           </div>
-          <div class="mt-4 p-3 rounded-lg bg-[#e5a93c]/10 text-xs text-[#e5a93c] font-medium">
-            <i class="fa-solid fa-check-circle mr-1"></i> Выгода бизнеса: гарантированный Cash Flow на месяц вперед.
-          </div>
+
         </div>
-      </div>
-    </div>
 
-    <!-- SLIDE 4: СКИДКА #2 — ПРИВЕТСТВЕННАЯ И РЕФЕРАЛЬНАЯ (SPEAKER 2) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— СКИДКА #2 (ПРИВЛЕЧЕНИЕ)</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Приветственная (50%) & Реферальная (1+1)</h2>
       </div>
+    </section>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219] flex flex-col justify-between">
+    <!-- SLIDE 5: QI STANDARD, MAGSAFE & FOD SAFETY SCANNER -->
+    <section class="slide" id="slide-5">
+      <div class="space-y-4">
+        <div class="anim-1 flex items-center justify-between border-b border-slate-700/50 pb-2">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-bold text-[#e5a93c] uppercase">ПЕРВАЯ ПОКУПКА</span>
-              <span class="px-2 py-0.5 rounded bg-[#e5a93c]/20 text-[#e5a93c] font-mono text-xs font-bold">-50% OFF</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Слайд 05 • Стандарты и Безопасность</span>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white">Стандарт Qi и Сканер Безопасности (FOD)</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-mono">Слайд 05/06</span>
+        </div>
+
+        <!-- 3 Interactive Feature Cards -->
+        <div class="anim-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Efficiency Progress -->
+          <div class="glass-card p-4 rounded-2xl border-t-4 border-t-emeraldGlow space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-heading font-bold text-white text-sm">КПД Передачи</h3>
+              <span class="text-base font-mono font-black text-neonGreen">75–80%</span>
             </div>
-            <h3 class="text-base font-bold text-white mb-2">Приветственная скидка 50%</h3>
-            <p class="text-xs text-[#9a8f82] leading-relaxed mb-3">
-              Предоставляется мгновенно при первом скачивании мобильного приложения и авторизации через Kaspi / номер телефона.
+            <!-- Animated Efficiency Meter -->
+            <div class="w-full bg-darkForest h-3 rounded-full overflow-hidden border border-slate-700">
+              <div class="h-full bg-gradient-to-r from-emeraldGlow to-neonGreen w-4/5 animate-pulse"></div>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              Остальные 20–25% энергии теряются на рассеивание магнитного поля и естественный нагрев катушек.
             </p>
           </div>
-          <div class="p-3 rounded-lg bg-[#16120e] text-xs text-[#9a8f82] border border-[#2a2219]">
-            <strong class="text-white">Эффект:</strong> Снимает психологический барьер пробы кофе из автомата.
+
+          <!-- MagSafe Alignment -->
+          <div class="glass-card p-4 rounded-2xl border-t-4 border-t-neonGreen space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-heading font-bold text-white text-sm">MagSafe & Qi2</h3>
+              <i class="fa-solid fa-magnet text-neonGreen"></i>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              Магнитные кольца автоматически сопоставляют оси катушек с точностью до миллиметра.
+            </p>
+            <button onclick="triggerMagSnap()" class="w-full py-1.5 rounded bg-neonGreen/20 text-neonGreen border border-neonGreen/40 text-xs font-bold font-mono">
+              <i class="fa-solid fa-arrows-to-circle mr-1"></i> Притянуть Магниты
+            </button>
+          </div>
+
+          <!-- FOD Scanner Interactive Card -->
+          <div class="glass-card p-4 rounded-2xl border-t-4 border-t-accentLime space-y-2 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <h3 class="font-heading font-bold text-white text-sm">Сканер FOD</h3>
+              <i class="fa-solid fa-shield-cat text-accentLime"></i>
+            </div>
+            <p class="text-[11px] text-slate-300">Обнаружение посторонних металлических предметов (монет, ключей).</p>
+            <button onclick="runFODScan()" class="w-full py-1.5 rounded bg-accentLime text-deepEmerald text-xs font-bold font-heading">
+              <i class="fa-solid fa-radar mr-1"></i> Сканировать Зарядку
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Dynamic FOD Scan Alert Banner -->
+        <div id="fodAlertBox" class="anim-3 glass-panel p-3.5 rounded-xl border border-neonGreen/30 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neonGreen/20 text-neonGreen flex items-center justify-center font-bold">
+              <i class="fa-solid fa-shield-halved" id="fodIcon"></i>
+            </div>
+            <div>
+              <strong class="text-white block" id="fodTitle">Система Безопасности Qi</strong>
+              <span class="text-slate-300 text-[11px]" id="fodStatus">Нажмите «Сканировать Зарядку» для проверки посторонних предметов.</span>
+            </div>
           </div>
         </div>
 
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#e5a93c]/40 gold-glow-sm flex flex-col justify-between">
+      </div>
+    </section>
+
+    <!-- SLIDE 6: HIGHWAY EV CHARGING & FINAL SUMMARY -->
+    <section class="slide" id="slide-6">
+      <div class="space-y-4">
+        <div class="anim-1 flex items-center justify-between border-b border-slate-700/50 pb-2">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-bold text-[#e5a93c] uppercase">ВИРУСНЫЙ РОСТ</span>
-              <span class="px-2 py-0.5 rounded bg-[#e5a93c]/20 text-[#e5a93c] font-mono text-xs font-bold">1+1 FREE</span>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">«Приведи друга» (Бесплатная чашка)</h3>
-            <p class="text-xs text-[#9a8f82] leading-relaxed mb-3">
-              Отправляешь промо-ссылку одногруппнику или коллеге — при первом заказе друга оба получаете по 100% скидке на напиток.
-            </p>
+            <span class="text-xs font-bold uppercase tracking-widest text-neonGreen font-heading">Слайд 06 • Перспективы и Итоги</span>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white">Будущее: Зарядка Электромобилей на Ходу</h2>
           </div>
-          <div class="p-3 rounded-lg bg-[#16120e] text-xs text-[#e5a93c] border border-[#e5a93c]/30">
-            <strong>CAC в 4 раза ниже:</strong> Себестоимость чашки всего ~150–200 ₸ вместо 1000+ ₸ на таргетинг.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 5: СКИДКА #3 — HAPPY HOURS (SPEAKER 3) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— СКИДКА #3 (ОПТИМИЗАЦИЯ ТРАФИКА)</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Динамические «Happy Hours» (до 25%)</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto items-center">
-        <div class="space-y-3">
-          <div class="p-4 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-            <h4 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <i class="fa-solid fa-wifi text-[#e5a93c]"></i> PUSH-уведомления по гео-зоне
-            </h4>
-            <p class="text-xs text-[#9a8f82]">
-              Телеметрия хаба фиксирует спад продаж с 14:00 до 16:30 и автоматически рассылает PUSH со скидкой 25% студентам и сотрудникам БЦ в радиусе 300м.
-            </p>
-          </div>
-          <div class="p-4 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-            <h4 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-[#e5a93c]"></i> Автоматическая гибкость
-            </h4>
-            <p class="text-xs text-[#9a8f82]">
-              В утренний пик (07:30–10:00) действует базовый тариф 100%, сглаживание маржи происходит за счет дневного объема.
-            </p>
-          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-mono">Слайд 06/06</span>
         </div>
 
-        <!-- Mini Load Graph visual -->
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219] flex flex-col justify-between h-full">
-          <div class="text-xs font-mono text-[#e5a93c] font-bold mb-3">СУТОЧНАЯ ЗАГРУЗКА ХАБА</div>
-          <div class="flex items-end justify-between h-32 px-2 pb-2 border-b border-[#2a2219]">
-            <div class="w-12 bg-[#e5a93c] rounded-t-md h-[90%] flex flex-col justify-end text-center p-1">
-              <span class="text-[9px] font-mono font-bold text-black">8-10ч</span>
+        <!-- Animated Highway Simulation Banner -->
+        <div class="anim-2 glass-card p-4 rounded-2xl border border-neonGreen/30 relative overflow-hidden space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono text-neonGreen font-bold uppercase"><i class="fa-solid fa-road mr-1"></i> Динамическая индукционная дорога</span>
+            <span class="text-slate-400 text-[11px]">Беспроводная передача энергии на скорости 120 км/ч</span>
+          </div>
+
+          <!-- Animated Road Graphics -->
+          <div class="relative w-full h-16 bg-darkForest rounded-xl overflow-hidden border border-slate-700 flex items-center">
+            <!-- Animated Road Lines -->
+            <div class="absolute bottom-2 left-0 w-full h-1 road-animated"></div>
+            
+            <!-- In-road Coils -->
+            <div class="absolute bottom-4 left-0 w-full flex justify-around">
+              <div class="w-8 h-2 bg-neonGreen/40 rounded-full animate-ping"></div>
+              <div class="w-8 h-2 bg-neonGreen/40 rounded-full animate-ping" style="animation-delay: 0.3s;"></div>
+              <div class="w-8 h-2 bg-neonGreen/40 rounded-full animate-ping" style="animation-delay: 0.6s;"></div>
             </div>
-            <div class="w-12 bg-[#a37928] rounded-t-md h-[40%] flex flex-col justify-end text-center p-1">
-              <span class="text-[9px] font-mono font-bold text-white">11-13ч</span>
-            </div>
-            <div class="w-12 bg-[#e5a93c]/80 rounded-t-md h-[75%] border border-[#e5a93c] flex flex-col justify-end text-center p-1">
-              <span class="text-[9px] font-mono font-bold text-black">14-16ч</span>
-            </div>
-            <div class="w-12 bg-[#a37928] rounded-t-md h-[55%] flex flex-col justify-end text-center p-1">
-              <span class="text-[9px] font-mono font-bold text-white">17-19ч</span>
+
+            <!-- Electric Car Icon Moving -->
+            <div class="text-2xl text-neonGreen absolute left-1/3 animate-bounce" style="animation-duration: 2s;">
+              <i class="fa-solid fa-car-side text-glow"></i>
             </div>
           </div>
-          <p class="text-[11px] text-[#9a8f82] mt-3">
-            <span class="text-[#e5a93c] font-bold">14:00–16:30 (Happy Hours):</span> прирост проданных чашек на +35% в непиковое время.
-          </p>
         </div>
-      </div>
-    </div>
 
-    <!-- SLIDE 6: СКИДКА #4 — КОМБО И B2B (SPEAKER 3) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— СКИДКА #4 (РОСТ СРЕДНЕГО ЧЕКА & B2B)</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Комбо «Кофе + Снек» & B2B Пакеты</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219] flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-bold text-[#e5a93c] uppercase">CROSS-SELL</span>
-              <span class="px-2 py-0.5 rounded bg-[#e5a93c]/20 text-[#e5a93c] font-mono text-xs font-bold">-15% COMBO</span>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">Комбо «Кофе + Снек / Выпечка»</h3>
-            <p class="text-xs text-[#9a8f82] leading-relaxed mb-3">
-              При совместной покупке напитка и выпечки в один клик через приложение клиент получает скидку 15% на весь комплект.
-            </p>
+        <!-- Authors Footer Summary Card -->
+        <div class="anim-3 glass-panel p-5 rounded-2xl border border-neonGreen/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <span class="text-xs font-mono text-neonGreen uppercase tracking-widest font-bold">Докладчики и авторы проекта:</span>
+            <h3 class="text-xl font-bold font-heading text-white">Хазиев Ильхам и Мацаев Юсуф</h3>
+            <p class="text-xs text-slate-300">Группа ПО-243 • Тема: «Беспроводная зарядка: Электромагнитная индукция»</p>
           </div>
-          <div class="p-3 rounded-lg bg-[#16120e] text-xs text-white font-mono border border-[#2a2219]">
-            Рост среднего чека точки на +32%
-          </div>
-        </div>
-
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#e5a93c]/40 gold-glow-sm flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-bold text-[#e5a93c] uppercase">B2B ТАРИФЫ</span>
-              <span class="px-2 py-0.5 rounded bg-[#e5a93c]/20 text-[#e5a93c] font-mono text-xs font-bold">-20% B2B</span>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">Корпоративные пакеты для компаний</h3>
-            <p class="text-xs text-[#9a8f82] leading-relaxed mb-3">
-              Оплата подписки компанией для сотрудников (элемент соцпакета для 60+ разработчиков или резидентов коворкинга).
-            </p>
-          </div>
-          <div class="p-3 rounded-lg bg-[#16120e] text-xs text-[#e5a93c] font-mono border border-[#e5a93c]/30">
-            Оптовый контракт: от 60 чашек/день
-          </div>
+          
+          <button onclick="goToSlide(1)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emeraldGlow to-neonGreen text-deepEmerald font-bold font-heading hover:scale-105 transition active:scale-95 whitespace-nowrap shadow-lg shadow-neonGreen/20">
+            <i class="fa-solid fa-rotate-left mr-2"></i> В начало
+          </button>
         </div>
       </div>
-    </div>
-
-    <!-- SLIDE 7: МАТРИЦА СКИДОК & СРАВНИТЕЛЬНЫЙ АНАЛИЗ (SPEAKER 4) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— МАТРИЦА СКИДОК ROAST & TECH</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Сравнительный анализ 4 скидочных механик</h2>
-      </div>
-
-      <div class="my-auto overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="border-b border-[#e5a93c]/30 text-[#e5a93c] font-mono uppercase">
-              <th class="p-3">Вид скидки</th>
-              <th class="p-3">Размер %</th>
-              <th class="p-3">Целевая аудитория</th>
-              <th class="p-3">Ключевая цель</th>
-              <th class="p-3">Эффект на маржу/CAC</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#2a2219] text-[#e2d9cd]">
-            <tr class="hover:bg-[#0b0907]">
-              <td class="p-3 font-bold text-white">1. «Кофе-Pass»</td>
-              <td class="p-3 font-mono text-[#e5a93c] font-bold">20% – 35%</td>
-              <td class="p-3">Постоянные клиенты (БЦ/ВУЗы)</td>
-              <td class="p-3">Максимизация LTV, Cash Flow</td>
-              <td class="p-3 text-emerald-400 font-mono">Маржа >60%</td>
-            </tr>
-            <tr class="hover:bg-[#0b0907]">
-              <td class="p-3 font-bold text-white">2. Приветственная & Реферал</td>
-              <td class="p-3 font-mono text-[#e5a93c] font-bold">50% / 100%</td>
-              <td class="p-3">Новые пользователи app</td>
-              <td class="p-3">Снижение CAC, виральность</td>
-              <td class="p-3 text-emerald-400 font-mono">CAC ~200 ₸</td>
-            </tr>
-            <tr class="hover:bg-[#0b0907]">
-              <td class="p-3 font-bold text-white">3. Dynamic Happy Hours</td>
-              <td class="p-3 font-mono text-[#e5a93c] font-bold">15% – 25%</td>
-              <td class="p-3">Студенты, фрилансеры</td>
-              <td class="p-3">Загрузка хаба с 14 до 16:30</td>
-              <td class="p-3 text-emerald-400 font-mono">+35% чашек в спад</td>
-            </tr>
-            <tr class="hover:bg-[#0b0907]">
-              <td class="p-3 font-bold text-white">4. Комбо & B2B Пакеты</td>
-              <td class="p-3 font-mono text-[#e5a93c] font-bold">15% – 20%</td>
-              <td class="p-3">Корпорации, компании</td>
-              <td class="p-3">Рост чекa, B2B контракты</td>
-              <td class="p-3 text-emerald-400 font-mono">Средний чек +32%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- SLIDE 8: ЗАКЛЮЧЕНИЕ И ВЫВОДЫ ДЛЯ ЗАЩИТЫ (SPEAKER 4) -->
-    <div class="slide w-full h-full flex-col justify-between p-6 md:p-10 bg-[#16120e] border border-[#2a2219] rounded-2xl gold-glow">
-      <div>
-        <div class="font-mono text-xs font-bold text-[#e5a93c] tracking-widest uppercase mb-1">— ВЫВОДЫ ДЛЯ ЗАЩИТЫ ПРОЕКТА</div>
-        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Экономическое обоснование эффективности</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[#e5a93c] font-mono text-xl font-extrabold mb-2">01</div>
-          <h3 class="text-sm font-bold text-white mb-1">Сохранение высокой маржи</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Отсутствие ФОТ бариста и аренды зала позволяет предоставлять скидки до 35%, сохраняя общую чистую маржинальность точки на уровне ~42%.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#e5a93c]/40 gold-glow-sm">
-          <div class="text-[#e5a93c] font-mono text-xl font-extrabold mb-2">02</div>
-          <h3 class="text-sm font-bold text-white mb-1">100% IT-Автоматизация</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Все скидки генерируются алгоритмами приложения автоматически на основе геолокации, профиля пользователя и времени суток.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-xl bg-[#0b0907] border border-[#2a2219]">
-          <div class="text-[#e5a93c] font-mono text-xl font-extrabold mb-2">03</div>
-          <h3 class="text-sm font-bold text-white mb-1">Прогнозируемый Cash Flow</h3>
-          <p class="text-xs text-[#9a8f82] leading-relaxed">
-            Модель «Кофе-Pass» обеспечивает авансовые поступления денежных средств, защищая бизнес от сезонных колебаний спроса.
-          </p>
-        </div>
-      </div>
-
-      <div class="text-center pt-3 border-t border-[#2a2219]">
-        <p class="text-sm font-bold text-[#e5a93c] font-mono">
-          СПАСИБО ЗА ВНИМАНИЕ! МЫ ГОТОВЫ ОТВЕТИТЬ НА ВАШИ ВОПРОСЫ.
-        </p>
-      </div>
-    </div>
+    </section>
 
   </main>
 
-  <!-- Bottom Interactive Controls & Slide Progress -->
-  <footer class="w-full max-w-7xl mx-auto flex items-center justify-between pt-3 border-t border-[#2a2219]">
-    <!-- Previous Button -->
-    <button id="prev-btn" onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-[#16120e] border border-[#2a2219] text-xs font-bold text-[#e2d9cd] hover:border-[#e5a93c] hover:text-[#e5a93c] transition flex items-center gap-2">
-      <i class="fa-solid fa-chevron-left text-xs"></i> Назад
-    </button>
+  <!-- ==================== BOTTOM CONTROL PANEL ==================== -->
+  <footer class="fixed bottom-3 left-0 right-0 z-40 px-6 pointer-events-none">
+    <div class="max-w-xl mx-auto glass-panel rounded-2xl px-5 py-3 flex items-center justify-between pointer-events-auto shadow-2xl">
+      
+      <!-- Prev Button -->
+      <button onclick="prevSlide()" class="p-2 rounded-xl text-slate-300 hover:text-neonGreen hover:bg-white/5 transition active:scale-95 flex items-center gap-2">
+        <i class="fa-solid fa-chevron-left text-sm"></i>
+        <span class="text-xs font-semibold hidden sm:inline">Назад</span>
+      </button>
 
-    <!-- Slide Indicator Dots -->
-    <div class="flex items-center gap-1.5 md:gap-2">
-      <button onclick="goToSlide(0)" class="dot w-6 h-2 rounded-full bg-[#e5a93c] transition-all"></button>
-      <button onclick="goToSlide(1)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(2)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(3)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(4)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(5)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(6)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
-      <button onclick="goToSlide(7)" class="dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all"></button>
+      <!-- Slide Counter Indicator & Modal Trigger -->
+      <div onclick="toggleGridModal()" class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-deepEmerald/80 border border-slate-700/60 hover:border-neonGreen transition flex items-center gap-2 text-xs font-mono">
+        <i class="fa-solid fa-layer-group text-neonGreen"></i>
+        <span id="slideCounter" class="text-white font-bold">1 / 6</span>
+      </div>
+
+      <!-- Next Button -->
+      <button onclick="nextSlide()" class="p-2 rounded-xl text-slate-300 hover:text-neonGreen hover:bg-white/5 transition active:scale-95 flex items-center gap-2">
+        <span class="text-xs font-semibold hidden sm:inline">Далее</span>
+        <i class="fa-solid fa-chevron-right text-sm"></i>
+      </button>
+
     </div>
-
-    <!-- Next Button -->
-    <button id="next-btn" onclick="nextSlide()" class="px-4 py-2 rounded-xl bg-[#e5a93c] text-[#0b0907] font-bold text-xs hover:bg-[#f5b94c] transition flex items-center gap-2 gold-glow-sm">
-      Вперед <i class="fa-solid fa-chevron-right text-xs"></i>
-    </button>
   </footer>
 
-  <!-- Navigation JavaScript Logic -->
-  <script>
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.slide');
-    const dots = document.querySelectorAll('.dot');
-    const speakerName = document.getElementById('speaker-name');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
+  <!-- ==================== OVERVIEW MODAL ==================== -->
+  <div id="gridModal" class="fixed inset-0 z-50 bg-deepEmerald/92 backdrop-blur-xl hidden flex-col justify-center items-center p-6 transition-all duration-300">
+    <div class="max-w-3xl w-full space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+          <i class="fa-solid fa-grip text-neonGreen"></i>
+          <span>Оглавление презентации</span>
+        </h2>
+        <button onclick="toggleGridModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
 
-    // 4 Speakers Mapping (2 slides per speaker)
-    const speakers = [
-      "", "", "", "", "", "", "", ""
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5" id="slidesGrid">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== KEYBOARD SHORTCUTS MODAL ==================== -->
+  <div id="shortcutsModal" class="fixed inset-0 z-50 bg-deepEmerald/92 backdrop-blur-xl hidden flex-col justify-center items-center p-6">
+    <div class="max-w-md w-full glass-panel p-6 rounded-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-heading font-bold text-white text-lg">Горячие клавиши</h3>
+        <button onclick="toggleShortcutsModal()" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between p-2 rounded bg-deepEmerald"><span class="text-neonGreen font-mono">← / →</span> <span>Навигация по слайдам</span></div>
+        <div class="flex justify-between p-2 rounded bg-deepEmerald"><span class="text-neonGreen font-mono">Пробел</span> <span>Следующий слайд</span></div>
+        <div class="flex justify-between p-2 rounded bg-deepEmerald"><span class="text-neonGreen font-mono">M</span> <span>Обзор всех слайдов</span></div>
+        <div class="flex justify-between p-2 rounded bg-deepEmerald"><span class="text-neonGreen font-mono">F</span> <span>Полноэкранный режим</span></div>
+        <div class="flex justify-between p-2 rounded bg-deepEmerald"><span class="text-neonGreen font-mono">Esc</span> <span>Закрыть диалоги</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 6;
+    let autoplayInterval = null;
+    let autoplayTimerVal = 0;
+    let isAutoplay = false;
+
+    const slideTitles = [
+      "Титульный слайд",
+      "Сравнение технологий",
+      "Закон индукции Фарадея",
+      "Симуляционная лаборатория",
+      "Стандарт Qi и FOD",
+      "Перспективы и Итоги"
     ];
 
-    function updateSlides() {
-      slides.forEach((slide, idx) => {
-        if (idx === currentSlide) {
-          slide.classList.add('active');
-        } else {
-          slide.classList.remove('active');
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+      initParticleCanvas();
+      init3DTiltCard();
+      updateDeckUI();
+      buildGridItems();
+      setupTouchSwipe();
+    });
+
+    /* Particle Background Engine */
+    function initParticleCanvas() {
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      const particles = [];
+      const particleCount = 45;
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          radius: Math.random() * 2 + 1,
+          alpha: Math.random() * 0.5 + 0.2
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
       });
 
-      // Update Dot Indicators
-      dots.forEach((dot, idx) => {
-        if (idx === currentSlide) {
-          dot.className = "dot w-6 h-2 rounded-full bg-[#e5a93c] transition-all";
-        } else {
-          dot.className = "dot w-2 h-2 rounded-full bg-[#2a2219] hover:bg-[#a37928] transition-all";
+      function animateCanvas() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particleCount; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(52, 211, 153, ${p.alpha})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#34d399';
+          ctx.fill();
+
+          for (let j = i + 1; j < particleCount; j++) {
+            const p2 = particles[j];
+            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 110) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(52, 211, 153, ${0.15 * (1 - dist / 110)})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
         }
+        requestAnimationFrame(animateCanvas);
+      }
+      animateCanvas();
+    }
+
+    /* 3D Tilt Card Effect */
+    function init3DTiltCard() {
+      const card = document.getElementById('tiltCard');
+      if (!card) return;
+
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        card.style.transform = `perspective(1000px) rotateY(${x / 15}deg) rotateX(${-y / 15}deg) scale3d(1.02, 1.02, 1.02)`;
       });
 
-      // Update Disabled state for buttons
-      prevBtn.style.opacity = currentSlide === 0 ? "0.5" : "1";
-      nextBtn.style.opacity = currentSlide === slides.length - 1 ? "0.5" : "1";
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)`;
+      });
+    }
+
+    /* Deck UI & State Updates */
+    function updateDeckUI() {
+      for (let i = 1; i <= totalSlides; i++) {
+        const slideEl = document.getElementById(`slide-${i}`);
+        if (slideEl) {
+          if (i === currentSlide) {
+            slideEl.classList.add('active');
+          } else {
+            slideEl.classList.remove('active');
+          }
+        }
+      }
+
+      const progressPercent = (currentSlide / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progressPercent}%`;
+      document.getElementById('slideCounter').innerText = `${currentSlide} / ${totalSlides}`;
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateDeckUI();
+        closeModals();
+      }
     }
 
     function nextSlide() {
-      if (currentSlide < slides.length - 1) {
+      if (currentSlide < totalSlides) {
         currentSlide++;
-        updateSlides();
+      } else {
+        currentSlide = 1;
       }
+      updateDeckUI();
     }
 
     function prevSlide() {
-      if (currentSlide > 0) {
+      if (currentSlide > 1) {
         currentSlide--;
-        updateSlides();
+        updateDeckUI();
       }
     }
 
-    function goToSlide(index) {
-      currentSlide = index;
-      updateSlides();
+    /* Interactive Tab Switcher Slide 2 */
+    function switchSlide2Tab(tab) {
+      const btnWired = document.getElementById('btnTabWired');
+      const btnWireless = document.getElementById('btnTabWireless');
+      const contentWired = document.getElementById('tabContentWired');
+      const contentWireless = document.getElementById('tabContentWireless');
+
+      if (tab === 'wired') {
+        btnWired.className = "px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-rose-500/20 text-rose-400 border border-rose-500/40";
+        btnWireless.className = "px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-darkForest text-slate-400 border border-slate-700";
+        contentWired.classList.remove('hidden');
+        contentWireless.classList.add('hidden');
+        animatePlugCounter();
+      } else {
+        btnWireless.className = "px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-neonGreen/20 text-neonGreen border border-neonGreen/40";
+        btnWired.className = "px-5 py-2.5 rounded-xl font-heading font-bold text-xs transition flex items-center gap-2 bg-darkForest text-slate-400 border border-slate-700";
+        contentWireless.classList.remove('hidden');
+        contentWired.classList.add('hidden');
+      }
     }
 
-    // Keyboard Arrow Navigation
+    function animatePlugCounter() {
+      const el = document.getElementById('plugCounter');
+      let count = 0;
+      const target = 1500;
+      const step = 50;
+      const timer = setInterval(() => {
+        count += step;
+        if (count >= target) {
+          el.innerText = '1 500+';
+          clearInterval(timer);
+        } else {
+          el.innerText = count;
+        }
+      }, 20);
+    }
+
+    /* Slide 4 Lab Simulations */
+    function setCoilFrequency(freq) {
+      const btn110 = document.getElementById('btnFreq110');
+      const btn205 = document.getElementById('btnFreq205');
+      const wave1 = document.getElementById('wave1');
+      const wave2 = document.getElementById('wave2');
+
+      if (freq === 110) {
+        btn110.className = "px-2.5 py-1 rounded bg-neonGreen text-deepEmerald font-mono font-bold";
+        btn205.className = "px-2.5 py-1 rounded bg-emeraldNavy text-slate-300 font-mono";
+        wave1.style.animationDuration = "2s";
+        wave2.style.animationDuration = "2s";
+      } else {
+        btn205.className = "px-2.5 py-1 rounded bg-neonGreen text-deepEmerald font-mono font-bold";
+        btn110.className = "px-2.5 py-1 rounded bg-emeraldNavy text-slate-300 font-mono";
+        wave1.style.animationDuration = "0.8s";
+        wave2.style.animationDuration = "0.8s";
+      }
+    }
+
+    let isAligned = true;
+    function toggleCoilAlignment() {
+      const rxGroup = document.getElementById('rxCoilGroup');
+      const btn = document.getElementById('btnToggleAlign');
+      isAligned = !isAligned;
+
+      if (isAligned) {
+        rxGroup.setAttribute('transform', 'translate(430, 80)');
+        btn.innerHTML = `<i class="fa-solid fa-arrows-to-dot mr-1"></i> Точное Совмещение`;
+        btn.className = "px-3 py-1 rounded bg-emeraldGlow/20 text-neonGreen border border-neonGreen/30 font-semibold";
+      } else {
+        rxGroup.setAttribute('transform', 'translate(430, 40)');
+        btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Смещение Осей`;
+        btn.className = "px-3 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold";
+      }
+    }
+
+    function simulateBatteryCharge() {
+      const bar = document.getElementById('simBatteryBar');
+      const txt = document.getElementById('simBatteryPercent');
+      let pct = 25;
+      const interval = setInterval(() => {
+        pct += 5;
+        if (pct > 100) {
+          pct = 100;
+          clearInterval(interval);
+        }
+        bar.style.width = `${pct}%`;
+        txt.innerText = `${pct}%`;
+      }, 100);
+    }
+
+    /* Slide 5 Safety Scanners */
+    function triggerMagSnap() {
+      alert("🧲 Система MagSafe / Qi2: Магнитное притягивание сопоставило катушки с точностью 0.5 мм!");
+    }
+
+    function runFODScan() {
+      const box = document.getElementById('fodAlertBox');
+      const icon = document.getElementById('fodIcon');
+      const title = document.getElementById('fodTitle');
+      const status = document.getElementById('fodStatus');
+
+      box.className = "anim-3 glass-panel p-3.5 rounded-xl border border-amber-400/40 flex items-center justify-between text-xs bg-amber-500/10";
+      icon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+      title.innerText = "Сканирование FOD... Обнаружен посторонний металл!";
+      status.innerText = "Внимание: На площадке обнаружена монета. Передача тока отключена для защиты от нагрева.";
+    }
+
+    /* Modals & Autoplay */
+    function toggleGridModal() {
+      const modal = document.getElementById('gridModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function toggleShortcutsModal() {
+      const modal = document.getElementById('shortcutsModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function closeModals() {
+      document.getElementById('gridModal').classList.add('hidden');
+      document.getElementById('gridModal').classList.remove('flex');
+      document.getElementById('shortcutsModal').classList.add('hidden');
+      document.getElementById('shortcutsModal').classList.remove('flex');
+    }
+
+    function buildGridItems() {
+      const container = document.getElementById('slidesGrid');
+      container.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const btn = document.createElement('button');
+        btn.onclick = () => goToSlide(i);
+        btn.className = `p-3.5 rounded-xl border text-left transition space-y-1.5 ${
+          i === currentSlide
+            ? 'bg-neonGreen/20 border-neonGreen text-white'
+            : 'glass-card border-slate-700/60 text-slate-300 hover:border-slate-500'
+        }`;
+        btn.innerHTML = `
+          <div class="text-[10px] font-mono font-bold text-neonGreen">СЛАЙД 0${i}</div>
+          <div class="text-xs font-bold font-heading line-clamp-2">${slideTitles[i-1]}</div>
+        `;
+        container.appendChild(btn);
+      }
+    }
+
+    function toggleAutoplay() {
+      isAutoplay = !isAutoplay;
+      const icon = document.getElementById('autoplayIcon');
+      const text = document.getElementById('autoplayText');
+      const circle = document.getElementById('autoplayTimerCircle');
+
+      if (isAutoplay) {
+        icon.className = "fa-solid fa-pause text-[10px] text-amber-400";
+        text.innerText = "Пауза";
+        autoplayTimerVal = 0;
+        autoplayInterval = setInterval(() => {
+          autoplayTimerVal += 2;
+          circle.setAttribute('stroke-dasharray', `${autoplayTimerVal}, 100`);
+          if (autoplayTimerVal >= 100) {
+            autoplayTimerVal = 0;
+            nextSlide();
+          }
+        }, 100);
+      } else {
+        icon.className = "fa-solid fa-play text-[10px] text-neonGreen";
+        text.innerText = "Авто";
+        circle.setAttribute('stroke-dasharray', `0, 100`);
+        clearInterval(autoplayInterval);
+      }
+    }
+
+    /* Keyboard Nav */
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'Space') {
-        nextSlide();
-      } else if (e.key === 'ArrowLeft') {
-        prevSlide();
-      }
+      if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'PageDown') nextSlide();
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+      else if (e.key === 'Home') goToSlide(1);
+      else if (e.key === 'End') goToSlide(totalSlides);
+      else if (e.key.toLowerCase() === 'm') toggleGridModal();
+      else if (e.key.toLowerCase() === 'f') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      } else if (e.key === 'Escape') closeModals();
     });
 
-    // Full Screen Toggle
-    function toggleFullScreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
+    /* Touch Swipe */
+    function setupTouchSwipe() {
+      let touchStartX = 0;
+      let touchEndX = 0;
+      document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, false);
+      document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) nextSlide();
+        if (touchEndX > touchStartX + 50) prevSlide();
+      }, false);
     }
-
-    // Initial setup
-    updateSlides();
   </script>
 </body>
 </html>
